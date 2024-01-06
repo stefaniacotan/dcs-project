@@ -9,21 +9,23 @@ import Components.PetriTransition;
 import DataObjects.DataCar;
 import DataObjects.DataCarQueue;
 import DataObjects.DataString;
+import DataObjects.DataTransfer;
+import DataOnly.TransferOperation;
 import Enumerations.LogicConnector;
 import Enumerations.TransitionCondition;
 import Enumerations.TransitionOperation;
 
 public class Lane {
 	public static void main(String[] args) {
-		
+
 		//--------------------------------------------------------------------
 		//-------------------------------Lane1--------------------------------
 		//--------------------------------------------------------------------
-		
+
 		PetriNet pn = new PetriNet();
 		pn.PetriNetName = "Main Petri";
 		pn.NetworkPort = 1080;
-		
+
 		DataCar p1 = new DataCar();
 		p1.SetName("P_a1");
 		pn.PlaceList.add(p1);
@@ -41,27 +43,35 @@ public class Lane {
 		p4.SetName("P_b1");
 		pn.PlaceList.add(p4);
 
-		DataString OP1 = new DataString();
-		OP1.SetName("OP1");
-		pn.PlaceList.add(OP1);
 		//Implementing OP1 as an output channel connected to the controller
-		//DataTransfer OP1 = new DataTransfer();
-		//OP1.SetName("OP1");
-		//OP1.Value = new TransferOperation("localhost", "1081", "in1");
-		//spn.PlaceList.add(OP1);
-		
+		DataTransfer OP1 = new DataTransfer();
+		OP1.SetName("OP1");
+		OP1.Value = new TransferOperation("localhost", "1081", "in");
+		pn.PlaceList.add(OP1);
+
 		DataString full = new DataString();
 		full.SetName("full");
 		full.SetValue("full");
 		pn.ConstantPlaceList.add(full);
 
-		
+
 		DataString green= new DataString();
 		green.SetName("green");
 		green.SetValue("green");
 		green.Printable= false;
 		pn.ConstantPlaceList.add(green);
-		
+
+//		DataString P0 = new DataString();
+//		P0.SetName("P0");
+//		P0.SetValue(1); /// ???
+//		pn.PlaceList.add(P0);
+
+//		DataString P1 = new DataString();
+//		P1.SetName("P1");
+//		pn.PlaceList.add(P1);
+
+
+
 		// T1 ------------------------------------------------
 		PetriTransition t1 = new PetriTransition(pn);
 		t1.TransitionName = "T_u1";
@@ -76,17 +86,18 @@ public class Lane {
 		grdT1.condition= T1Ct1;
 		grdT1.Activations.add(new Activation(t1, "P_a1", TransitionOperation.AddElement, "P_x1"));
 		t1.GuardMappingList.add(grdT1);
-		
+
+
 		Condition T1Ct3 = new Condition(t1, "P_a1", TransitionCondition.NotNull);
 		Condition T1Ct4 = new Condition(t1, "P_x1", TransitionCondition.CanNotAddCars);
 		T1Ct3.SetNextCondition(LogicConnector.AND, T1Ct4);
 
 		GuardMapping grdT11 = new GuardMapping();
 		grdT11.condition= T1Ct3;
-		grdT11.Activations.add(new Activation(t1, "full", TransitionOperation.Copy, "OP1"));
-		grdT11.Activations.add(new Activation(t1, "P_a1", TransitionOperation.Copy, "P_a1"));
+		grdT11.Activations.add(new Activation(t1, "full", TransitionOperation.SendOverNetwork, "OP1"));// ???
+		grdT11.Activations.add(new Activation(t1, "P_a1", TransitionOperation.Move, "P_a1"));
 		t1.GuardMappingList.add(grdT11);
-		
+
 		t1.Delay = 0;
 		pn.Transitions.add(t1);
 
@@ -96,7 +107,7 @@ public class Lane {
 		t2.InputPlaceName.add("P_x1");
 		t2.InputPlaceName.add("P_TL1");
 
-		
+
 		Condition T2Ct1 = new Condition(t2, "P_TL1", TransitionCondition.Equal,"green");
 		Condition T2Ct2 = new Condition(t2, "P_x1", TransitionCondition.HaveCar);
 		T2Ct1.SetNextCondition(LogicConnector.AND, T2Ct2);
@@ -105,22 +116,22 @@ public class Lane {
 		grdT2.condition= T2Ct1;
 		grdT2.Activations.add(new Activation(t2, "P_x1", TransitionOperation.PopElementWithoutTarget, "P_b1"));
 		grdT2.Activations.add(new Activation(t2, "P_TL1", TransitionOperation.Move, "P_TL1"));
-		
+
 		t2.GuardMappingList.add(grdT2);
-		
+
 		t2.Delay = 0;
 		pn.Transitions.add(t2);
-		
-		
-		
+
+
+
 		//-------------------------------------------------------------------------------------
 		//----------------------------PN Start-------------------------------------------------
 		//-------------------------------------------------------------------------------------
 
-		System.out.println("Exp1 started \n ------------------------------");
+		System.out.println("Lane started \n ------------------------------");
 		pn.Delay = 2000;
 		//pn.Start();
-		
+
 		PetriNetWindow frame = new PetriNetWindow(false);
 		frame.petriNet = pn;
 		frame.setVisible(true);

@@ -1,8 +1,10 @@
 package Components;
 
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import Components.PetriTransition;
 import DataObjects.DataCar;
 import DataObjects.DataCarQueue;
 import DataOnly.CarQueue;
@@ -23,7 +25,7 @@ import Utilities.Functions;
 public class Activation implements Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -41,7 +43,7 @@ public class Activation implements Serializable {
 	}
 
 	public Activation(PetriTransition Parent, String InputPlaceName, TransitionOperation Condition,
-			String OutputPlaceName) {
+					  String OutputPlaceName) {
 		util = new Functions();
 		this.Parent = Parent;
 		this.InputPlaceName = InputPlaceName;
@@ -50,7 +52,7 @@ public class Activation implements Serializable {
 	}
 
 	public Activation(PetriTransition Parent, ArrayList<String> InputPlaceNames, TransitionOperation Condition,
-			String OutputPlaceName) {
+					  String OutputPlaceName) {
 		util = new Functions();
 		this.Parent = Parent;
 		this.InputPlaceNames = InputPlaceNames;
@@ -59,7 +61,7 @@ public class Activation implements Serializable {
 	}
 
 	public Activation(PetriTransition Parent, String InputPlaceName, TransitionOperation Condition,
-			ArrayList<String> OutputPlaceNames) {
+					  ArrayList<String> OutputPlaceNames) {
 		util = new Functions();
 		this.Parent = Parent;
 		this.InputPlaceName = InputPlaceName;
@@ -67,7 +69,7 @@ public class Activation implements Serializable {
 		this.Operation = Condition;
 	}
 
-	
+
 	public void Activate() throws CloneNotSupportedException {
 
 		if (Operation == TransitionOperation.Move)
@@ -314,15 +316,17 @@ public class Activation implements Serializable {
 			if (temp instanceof DataFloat) {
 				if (result == null) {
 					result = (PetriObject) ((DataFloat) temp).clone();
+				} else {
+					result.SetValue((float) result.GetValue() * (float) temp.GetValue());
 				}
-				result.SetValue((float) result.GetValue() * (float) temp.GetValue());
 			}
 
 			if (temp instanceof DataInteger) {
 				if (result == null) {
 					result = (PetriObject) ((DataInteger) temp).clone();
+				} else {
+					result.SetValue((Integer) result.GetValue() * (Integer) temp.GetValue());
 				}
-				result.SetValue((Integer) result.GetValue() * (Integer) temp.GetValue());
 			}
 		}
 		result.SetName(OutputPlaceName);
